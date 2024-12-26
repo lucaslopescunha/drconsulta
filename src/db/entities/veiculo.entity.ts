@@ -1,5 +1,6 @@
 import { IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ControleVeiculosEntity } from "./controle-veiculos.entity";
 
 @Entity({name: 'VEICULO'})
 export class VeiculoEntity {
@@ -21,6 +22,10 @@ export class VeiculoEntity {
   
     @Column({type: "varchar"})
     marca: string;
+
+    @OneToMany(()=> ControleVeiculosEntity, (controle) => controle.veiculo)
+    controles: ControleVeiculosEntity[];
+    
 }
 
 export interface FindAllParameters {

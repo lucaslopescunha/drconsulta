@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ControleVeiculosEntity } from "./controle-veiculos.entity";
 
 @Entity({ name: 'ESTABELECIMENTO' })
 export class EstabelecimentoEntity {
@@ -29,6 +30,10 @@ export class EstabelecimentoEntity {
 
     @Column({ type: "int", name: "VAGAS_RESTANTES_CARRO" })
     vagasRestantesCarro: number;
+
+    @OneToMany(()=> ControleVeiculosEntity, (controle) => controle.estabelecimento)
+    controles: ControleVeiculosEntity[];
+    
 }
 
 export interface FindAllParameters {

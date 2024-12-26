@@ -1,9 +1,12 @@
 import { IsDateString, isDateString, IsEnum, IsNumber, IsOptional, IsString, length, MaxLength, MinLength } from "class-validator";
 import { IntegerType } from "typeorm";
 
+export enum TipoRegistroEnum {
+    "E" = 'Entrada',
+    "S" = 'Saída'
+}
 
 export class ControleVeiculosDto {
-
 
     @IsOptional()
     id: number;
@@ -21,6 +24,10 @@ export class ControleVeiculosDto {
     @IsDateString()
     @IsOptional()
     dtEntrada: Date;
+    
+    @IsEnum(TipoRegistroEnum)
+    tipo: string;
+    
 }
 
 export interface FindAllParameters {

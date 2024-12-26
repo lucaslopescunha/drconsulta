@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { VeiculoEntity } from "./veiculo.entity";
 import { EstabelecimentoEntity } from "./estabelecimento.entity";
 
@@ -8,11 +8,11 @@ export class ControleVeiculosEntity {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @OneToOne(() => VeiculoEntity)
+    @ManyToOne(() => VeiculoEntity, (veiculo) => veiculo.controles)
     @JoinColumn({ name: "ID_VEICULO"})
     veiculo: VeiculoEntity;
 
-    @OneToOne(() => EstabelecimentoEntity)
+    @ManyToOne(() => EstabelecimentoEntity, (estabelecimento) => estabelecimento.controles)
     @JoinColumn({ name: "ID_ESTABELECIMENTO"})
     estabelecimento: EstabelecimentoEntity;
 
@@ -21,6 +21,11 @@ export class ControleVeiculosEntity {
 
     @Column({name: "DT_SAIDA", type: "timestamp"})
     dtSaida: Date;
+
+    constructor(veiculo?: VeiculoEntity, estabelecimento?: EstabelecimentoEntity) {
+        this.veiculo = veiculo;
+        this.estabelecimento = estabelecimento;
+    }
 }
 
 export interface FindAllParameters {
