@@ -21,30 +21,16 @@ export class ControleService {
 
 
     async create(controleVeiculos: ControleVeiculosDto): Promise<ControleVeiculosDto | null> {
-        const estabelecimentoRegistrado = await this.findByVeiculoEstabelecimento(controleVeiculos.veiculo, controleVeiculos.estabelecimento);
-        var veiculoEncontrado = await this.veiculosService.findOneBy(controleVeiculos.veiculo);
-        if (estabelecimentoRegistrado && TipoRegistroEnum[controleVeiculos.tipo] == TipoRegistroEnum.E) {
-            throw new ConflictException(`Veículo ${veiculoEncontrado.placa} não registrou saída `)
+        const controleRegistrado = await this.findControleByVeiculoEstabelecimento(controleVeiculos.veiculo, controleVeiculos.estabelecimento);
+        var veiculoEncontrado = await this.validarRegistros(controleRegistrado, controleVeiculos);
+        const dbControleVeiculos = controleRegistrado.id ? controleRegistrado : new ControleVeiculosEntity();
+
+        if(!controleVeiculos.dtSaida && TipoRegistroEnum[controleVeiculos.tipo] == TipoRegistroEnum.S) {
+            dbControleVeiculos.dtSaida = new Date();
         }
-        if (!estabelecimentoRegistrado && TipoRegistroEnum[controleVeiculos.tipo] == TipoRegistroEnum.S) {
-            throw new ConflictException(`Veículo  ${veiculoEncontrado.placa} não registrou entrada`)
-        }
-        const dbControleVeiculos = new ControleVeiculosEntity();
-        if(controleVeiculos.dtSaida && TipoRegistroEnum[controleVeiculos.tipo] == TipoRegistroEnum.S) {
-            dbControleVeiculos.dtSaida = controleVeiculos.dtSaida;
-        }
-        const estabelecimentoEncontrado = await this.estabelecimentoService.findById(controleVeiculos.estabelecimento);
-        if (TipoEnum[veiculoEncontrado.tipo] === TipoEnum.C && estabelecimentoEncontrado.vagasRestantesCarro > 0) {
-            estabelecimentoEncontrado.vagasRestantesCarro = !estabelecimentoEncontrado.vagasRestantesCarro ?
-                estabelecimentoEncontrado.qtdeVagasCarro - 1 : (estabelecimentoEncontrado.vagasRestantesCarro - 1);
-        } else if (TipoEnum[veiculoEncontrado.tipo] === TipoEnum.M && estabelecimentoEncontrado.vagasRestantesMoto > 0) {
-            estabelecimentoEncontrado.vagasRestantesMoto = !estabelecimentoEncontrado.vagasRestantesMoto ?
-                estabelecimentoEncontrado.qtdeVagasMoto - 1 : (estabelecimentoEncontrado.vagasRestantesMoto - 1);
-        } else {
-            throw new BadRequestException(`Não há vagas disponíveis para veículos ${TipoEnum[veiculoEncontrado.tipo]}`)
-        }
+        const estabelecimentoEncontrado = await this.validarVagas(veiculoEncontrado, controleVeiculos.estabelecimento);
         dbControleVeiculos.estabelecimento = await this.estabelecimentoService.salvarEstabelecimento(estabelecimentoEncontrado);
-        if(!dbControleVeiculos) {
+        if(!dbControleVeiculos.veiculo) {
             dbControleVeiculos.veiculo = veiculoEncontrado;
         }
         const { id, dtEntrada, dtSaida, veiculo, estabelecimento } = await this.controleVeiculosRepository.save(dbControleVeiculos);
@@ -52,12 +38,25 @@ export class ControleService {
         return { id, dtEntrada, dtSaida, veiculo: veiculo.id, estabelecimento: estabelecimento.id, tipo: controleVeiculos.tipo };
     }
 
-    async vagasEstabelecimento(veiculo: VeiculoEntity, idEstabelecimento: number): Promise<EstabelecimentoEntity | null> {
+    async validarRegistros(controleRegistrado: ControleVeiculosEntity, controleRecebido: ControleVeiculosDto): Promise<VeiculoEntity | null> {
+        var veiculoEncontrado = await this.veiculosService.findOneBy(controleRecebido.veiculo);
+        // Caso o registro seja de entrada
+        if (controleRegistrado && TipoRegistroEnum[controleRecebido.tipo] == TipoRegistroEnum.E) {
+            throw new ConflictException(`Veículo ${veiculoEncontrado.placa} não registrou saída `)
+        }
+        // caso o registro seja de saída
+        if (!controleRegistrado && TipoRegistroEnum[controleRecebido.tipo] == TipoRegistroEnum.S) {
+            throw new ConflictException(`Veículo  ${veiculoEncontrado.placa} não registrou entrada`)
+        }
+        return veiculoEncontrado;
+    }
+
+    async validarVagas(veiculo: VeiculoEntity, idEstabelecimento: number): Promise<EstabelecimentoEntity | null> {
         const estabelecimento = await this.estabelecimentoService.findById(idEstabelecimento);
-        if (TipoEnum[veiculo.tipo] === TipoEnum.C && estabelecimento.vagasRestantesCarro > 0) {
+        if (TipoEnum[veiculo.tipo] == TipoEnum.C && estabelecimento.vagasRestantesCarro > 0) {
             estabelecimento.vagasRestantesCarro = !estabelecimento.vagasRestantesCarro ?
             estabelecimento.qtdeVagasCarro - 1 : (estabelecimento.vagasRestantesCarro - 1);
-        } else if (TipoEnum[veiculo.tipo] === TipoEnum.M && estabelecimento.vagasRestantesMoto > 0) {
+        } else if (TipoEnum[veiculo.tipo] == TipoEnum.M && estabelecimento.vagasRestantesMoto > 0) {
             estabelecimento.vagasRestantesMoto = !estabelecimento.vagasRestantesMoto ?
             estabelecimento.qtdeVagasMoto - 1 : (estabelecimento.vagasRestantesMoto - 1);
         } else {
@@ -66,7 +65,7 @@ export class ControleService {
         return estabelecimento;
     }
 
-    async findByVeiculoEstabelecimento(veiculo: number, estabelecimento: number): Promise<ControleVeiculosDto | null> {
+    async findControleByVeiculoEstabelecimento(veiculo: number, estabelecimento: number): Promise<ControleVeiculosEntity | null> {
 
         const controleVeiculosFound = await this.controleVeiculosRepository.findOne({
             relations: ['veiculo', 'estabelecimento'], 
@@ -76,17 +75,7 @@ export class ControleService {
                 dtSaida: IsNull()
             },
         });
-        if (!controleVeiculosFound) {
-            throw new BadRequestException("falha");
-        }
-        return {
-            id: controleVeiculosFound.id,
-            veiculo: controleVeiculosFound.veiculo.id,
-            estabelecimento: controleVeiculosFound.estabelecimento.id,
-            dtEntrada: controleVeiculosFound.dtEntrada,
-            dtSaida: controleVeiculosFound.dtSaida,
-            tipo: ""
-        }
+        return controleVeiculosFound;
     }
 
 }
