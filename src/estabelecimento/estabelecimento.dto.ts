@@ -35,3 +35,7 @@ export interface FindAllParameters {
     nome: string;
     cnpj: string;
 }
+export class EstabelecimentoRouteParameters {
+    @IsNumber()
+    id: number;
+}

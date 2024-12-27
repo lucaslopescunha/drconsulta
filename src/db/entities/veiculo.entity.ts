@@ -6,7 +6,7 @@ import { ControleVeiculosEntity } from "./controle-veiculos.entity";
 export class VeiculoEntity {
 
     @PrimaryGeneratedColumn('increment')
-    id: number;
+    id?: number;
 
     @Column({type: "varchar"})
     modelo: string;
@@ -24,7 +24,7 @@ export class VeiculoEntity {
     marca: string;
 
     @OneToMany(()=> ControleVeiculosEntity, (controle) => controle.veiculo)
-    controles: ControleVeiculosEntity[];
+    controles?: ControleVeiculosEntity[];
     
 }
 

@@ -31,4 +31,5 @@ export class ControleVeiculosEntity {
 export interface FindAllParameters {
     nome: string;
     cnpj: string;
+    idEstabelecimento: number;
 }

@@ -24,13 +24,17 @@ export class ControleVeiculosDto {
     @IsDateString()
     @IsOptional()
     dtEntrada: Date;
-    
+
     @IsEnum(TipoRegistroEnum)
     tipo: string;
-    
+
 }
 
 export interface FindAllParameters {
     nome: string;
     cnpj: string;
+    estabelecimento: number;
+    dtInicio: Date;
+    dtFim: Date;
+    tipoRelatorio: TipoRegistroEnum;
 }

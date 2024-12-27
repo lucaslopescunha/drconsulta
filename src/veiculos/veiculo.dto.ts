@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 
 export enum CorEnum {
     "B" = 'BRANCO',
@@ -40,4 +40,9 @@ export interface FindAllParameters {
     modelo: string;
     placa: string;
     tipo: string;
+}
+
+export class VeiculoRouteParameters {
+    @IsNumber()
+    id: number;
 }
