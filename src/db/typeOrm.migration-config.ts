@@ -4,6 +4,7 @@ import { DataSource, DataSourceOptions } from "typeorm";
 import { EstabelecimentoEntity } from "./entities/estabelecimento.entity";
 import { VeiculoEntity } from "./entities/veiculo.entity";
 import { UsuarioEntity } from "./entities/user.entity";
+import { ControleVeiculosEntity } from "./entities/controle-veiculos.entity";
 
 config();
 
@@ -16,7 +17,7 @@ const dataSourceOptions: DataSourceOptions = {
     username: configService.get<string>('DB_USERNAME'),
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_NAME'),
-    entities: [EstabelecimentoEntity,VeiculoEntity, UsuarioEntity],
+    entities: [EstabelecimentoEntity,VeiculoEntity, UsuarioEntity, ControleVeiculosEntity],
     migrations: [__dirname+'/migrations/*.ts'],
     synchronize: false
 

@@ -22,7 +22,6 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if(!token) {
-      console.log("falhou no 1", token)
       throw new UnauthorizedException();
     }
 
@@ -35,7 +34,6 @@ export class AuthGuard implements CanActivate {
       )
       request['user'] = payload;
     } catch {
-      console.log("falhou no 2", token)
       throw new UnauthorizedException();
     }
     return true;
@@ -43,7 +41,6 @@ export class AuthGuard implements CanActivate {
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    console.log("tipo token", type);
     return type === 'Bearer' ? token: undefined;
   }
 }

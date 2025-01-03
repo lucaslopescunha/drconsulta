@@ -3,8 +3,10 @@ import { EstabelecimentoService } from './estabelecimento.service';
 import { EstabelecimentoDto, EstabelecimentoRouteParameters, FindAllParameters } from './estabelecimento.dto';
 import { EstabelecimentoEntity } from 'src/db/entities/estabelecimento.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard)
+@ApiBearerAuth()
 @Controller('estabelecimento')
 export class EstabelecimentoController {
 
@@ -26,9 +28,9 @@ export class EstabelecimentoController {
         return this.estabelecimentoService.findAll(params);
     }
 
-    @Put() 
-    async update(@Body() estabelecimento: EstabelecimentoDto) {
-        await this.estabelecimentoService.update(estabelecimento);
+    @Put("/:id") 
+    update(@Param('id') id: number, @Body() estabelecimento: EstabelecimentoDto) {
+        this.estabelecimentoService.update(id, estabelecimento);
     }
 
     @Delete("/:id")

@@ -1,9 +1,9 @@
 import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EstabelecimentoEntity } from 'src/db/entities/estabelecimento.entity';
 import { Equal, FindOptionsWhere, IsNull, Like, Repository } from 'typeorm';
+import { EstabelecimentoEntity } from '../db/entities/estabelecimento.entity';
 import { EstabelecimentoDto, FindAllParameters } from './estabelecimento.dto';
-import { ControleVeiculosEntity } from 'src/db/entities/controle-veiculos.entity';
+import { ControleVeiculosEntity } from '../db/entities/controle-veiculos.entity';
 
 @Injectable()
 export class EstabelecimentoService {
@@ -24,14 +24,13 @@ export class EstabelecimentoService {
         return { id, cnpj, nome, endereco, telefone, qtdeVagasCarro, qtdeVagasMoto };
     }
 
-    async update(estabelecimento: EstabelecimentoDto): Promise<EstabelecimentoDto> {
-        const estabelecimentoRegistrado = await this.findById(estabelecimento.id);
+    async update(idEstabelecimento: number, estabelecimento: EstabelecimentoDto) {
+        const estabelecimentoRegistrado = await this.findById(idEstabelecimento);
         if (!estabelecimentoRegistrado) {
             throw new ConflictException(`Estabelecimento ${estabelecimento.nome} não existe.`)
         }
         const dbEstabelecimento = this.mapDtoToEntity(estabelecimento, estabelecimentoRegistrado.controles);
-        const { id, cnpj, nome, endereco, telefone, qtdeVagasCarro, qtdeVagasMoto } = await this.salvarEstabelecimento(dbEstabelecimento);
-        return { id, cnpj, nome, endereco, telefone, qtdeVagasCarro, qtdeVagasMoto };
+        await this.update(idEstabelecimento, dbEstabelecimento);
     }
 
     async remove(id: number) {

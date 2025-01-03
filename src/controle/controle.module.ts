@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ControleVeiculosDto } from './controle.dto';
-import { ControleVeiculosEntity } from 'src/db/entities/controle-veiculos.entity';
+import { ControleVeiculosEntity } from '../db/entities/controle-veiculos.entity';
+import { EstabelecimentoEntity } from '../db/entities/estabelecimento.entity';
+import { VeiculoEntity } from '../db/entities/veiculo.entity';
 import { ControleController } from './controle.controller';
 import { ControleService } from './controle.service';
-import { EstabelecimentoService } from 'src/estabelecimento/estabelecimento.service';
-import { VeiculosService } from 'src/veiculos/veiculos.service';
-import { EstabelecimentoEntity } from 'src/db/entities/estabelecimento.entity';
-import { VeiculoEntity } from 'src/db/entities/veiculo.entity';
+import { EstabelecimentoService } from '../estabelecimento/estabelecimento.service';
+import { VeiculosService } from '../veiculos/veiculos.service';
 
 
 @Module({

@@ -16,20 +16,14 @@ export class ControleVeiculosEntity {
     @JoinColumn({ name: "ID_ESTABELECIMENTO"})
     estabelecimento: EstabelecimentoEntity;
 
-    @Column({name: "DT_ENTRADA", type: "timestamp"})
+    @Column({name: "DT_ENTRADA", type: "datetime"})
     dtEntrada: Date;
 
-    @Column({name: "DT_SAIDA", type: "timestamp"})
+    @Column({name: "DT_SAIDA", type: "datetime"})
     dtSaida: Date;
 
     constructor(veiculo?: VeiculoEntity, estabelecimento?: EstabelecimentoEntity) {
         this.veiculo = veiculo;
         this.estabelecimento = estabelecimento;
     }
-}
-
-export interface FindAllParameters {
-    nome: string;
-    cnpj: string;
-    idEstabelecimento: number;
 }

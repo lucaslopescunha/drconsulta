@@ -1,15 +1,15 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { ControleVeiculosEntity } from 'src/db/entities/controle-veiculos.entity';
 import { Between, Equal, FindOptionsWhere, IsNull, Repository } from 'typeorm';
-import { ControleVeiculosDto, FindAllParameters, TipoRegistroEnum } from './controle.dto';
-import { EstabelecimentoService } from 'src/estabelecimento/estabelecimento.service';
-import { VeiculosService } from 'src/veiculos/veiculos.service';
-import { TipoEnum } from 'src/veiculos/veiculo.dto';
-import { EstabelecimentoEntity } from 'src/db/entities/estabelecimento.entity';
-import { VeiculoEntity } from 'src/db/entities/veiculo.entity';
 import { format } from 'date-fns';
+import { ControleVeiculosEntity } from '../db/entities/controle-veiculos.entity';
+import { ControleVeiculosDto, FindAllParameters, TipoRegistroEnum } from './controle.dto';
+import { VeiculoEntity } from '../db/entities/veiculo.entity';
+import { EstabelecimentoEntity } from '../db/entities/estabelecimento.entity';
+import { TipoEnum } from '../veiculos/veiculo.dto';
+import { EstabelecimentoService } from '../estabelecimento/estabelecimento.service';
+import { VeiculosService } from '../veiculos/veiculos.service';
 @Injectable()
 export class ControleService {
 
@@ -54,6 +54,7 @@ export class ControleService {
 
     async validarVagas(veiculo: VeiculoEntity, idEstabelecimento: number): Promise<EstabelecimentoEntity | null> {
         const estabelecimento = await this.estabelecimentoService.findById(idEstabelecimento);
+        console.log("tipo veiculo", TipoEnum[veiculo.tipo] == TipoEnum.C);
         if (TipoEnum[veiculo.tipo] == TipoEnum.C && estabelecimento.vagasRestantesCarro > 0) {
             estabelecimento.vagasRestantesCarro = !estabelecimento.vagasRestantesCarro ?
                 estabelecimento.qtdeVagasCarro - 1 : (estabelecimento.vagasRestantesCarro - 1);
@@ -77,43 +78,6 @@ export class ControleService {
             },
         });
         return controleVeiculosFound;
-    }
-
-    async findAll(params: FindAllParameters): Promise<ControleVeiculosDto[]> {
-        const searchPrams: FindOptionsWhere<ControleVeiculosEntity> = {}
-
-        if (params.dtInicio != null && params.dtFim != null && TipoRegistroEnum[params.tipoRelatorio] == TipoRegistroEnum.E) {
-            searchPrams.dtEntrada = Between(params.dtInicio, 
-            params.dtFim);
-        }
-        
-        if (params.dtInicio != null && params.dtFim != null && TipoRegistroEnum[params.tipoRelatorio] == TipoRegistroEnum.S) {
-            console.log("saida", params)
-            searchPrams.dtSaida = Between(params.dtInicio, params.dtFim);
-        }
-        if (params.estabelecimento != null) {
-            searchPrams.estabelecimento = Equal(params.estabelecimento);
-        }
-        console.log("parametros",searchPrams);
-        const controleFound = await this.controleVeiculosRepository.find({
-            relations: ['veiculo', 'estabelecimento'],
-
-            where: searchPrams
-        });
-        return controleFound.map(controleEntity => this.mapEntityToDto(controleEntity));
-    }
-
-
-    private mapEntityToDto(controle: ControleVeiculosEntity): ControleVeiculosDto {
-        console.log("controla", controle);
-        const controleDto = new ControleVeiculosDto();
-        controleDto.id = controle.id;
-        controleDto.dtEntrada = controle.dtEntrada;
-        controleDto.dtSaida = controle.dtSaida;
-        controleDto.estabelecimento = controle.estabelecimento?.id;
-        controleDto.veiculo = controle.veiculo?.id;
-        return controleDto;
-
     }
 
 }
